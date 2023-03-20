@@ -28,3 +28,11 @@ sudo apt-get install mp3splt
 4. The script names the output files with the chapter number and the chapter title.
 
 Note: The script requires an internet connection to download the audio file from YouTube. It also assumes that the YouTube video has chapter information in its metadata.
+
+## Todo
+
+- [ ] Add possibility to download playlists
+- [ ] Add error handling in case the download or splitting process fails.
+- [ ] Improve the user interface by allowing the user to input the YouTube URL and output file name as command-line arguments.
+- [ ] Add more params to be changeable
+- [ ] Check if it is possible to check work directory
