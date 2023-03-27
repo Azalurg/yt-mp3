@@ -36,3 +36,5 @@ Note: The script requires an internet connection to download the audio file from
 - [ ] Improve the user interface by allowing the user to input the YouTube URL and output file name as command-line arguments.
 - [ ] Add more params to be changeable
 - [ ] Check if it is possible to check work directory
+- [ ] Add environment variables
+- [ ] Add requirements.txt

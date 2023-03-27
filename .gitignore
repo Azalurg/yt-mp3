@@ -1,2 +1,5 @@
+.vscode/*
+.idea/*
+
 *.mp3
 *.json

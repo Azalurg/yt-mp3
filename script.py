@@ -4,25 +4,27 @@ import subprocess
 
 # ==================
 
-yt_url = "https://www.youtube.com/watch?v=b1Fo_M_tj6w"
-mp3_file_name = "input.mp3"
+yt_url = ""
+work_dir = ""
 
 # ==================
+
+origin_file = f"{work_dir}/{yt_url.split('=')[1]}.mp3"
 
 
 # Download mp3 file
 def download_yt_mp3():
     subprocess.run(
-        f"yt-dlp -o '{mp3_file_name}' --extract-audio --audio-format mp3 --audio-quality 256K --add-metadata --write-info-json {yt_url}",
+        f"yt-dlp -o '{origin_file}' --extract-audio --audio-format mp3 --audio-quality 256K --add-metadata --write-info-json {yt_url}",
         shell=True,
     )
 
 
 # Cut by chapters
-def cut_by_chapters():
+def cut_by_chapters(numbers: bool = False):
     # Find chapters in metadata
     chapters = ""
-    with open(f"{mp3_file_name}.info.json", "r") as f:
+    with open(f"{origin_file}.info.json", "r") as f:
         data = json.load(f)
         chapters = data["chapters"]
 
@@ -32,7 +34,8 @@ def cut_by_chapters():
         end = chapter["end_time"]
         title = chapter["title"].strip()
 
-        output_file = "{:02d}. {}".format(i, title)
+        if numbers:
+            title = "{:02d}. {}".format(i, title)
 
         # Calculate the start time in the format required by mp3splt
         start_minutes = int(start) // 60
@@ -45,9 +48,21 @@ def cut_by_chapters():
         end_time = f"{end_minutes:02d}.{end_seconds:02d}"
 
         subprocess.run(
-            f"mp3splt -q -o '{output_file}' {mp3_file_name} {start_time} {end_time}",
+            f"mp3splt -q -o '{title}' {origin_file} {start_time} {end_time}",
             shell=True,
         )
+
+
+# Download video cover
+def download_cover():
+    subprocess.run(f"yt-dlp -o '{work_dir}/cover.jpg' --skip-download --write-thumbnail {yt_url}", shell=True)
+    subprocess.run(f"mv {work_dir}/cover.jpg.webp {work_dir}/cover.jpg", shell=True)
+
+
+# Remove original file and metadata
+def clear():
+    subprocess.run(f"rm -rf {origin_file}", shell=True)
+    subprocess.run(f"rm -rf {origin_file}.info.json", shell=True)
 
 
 # Main function
@@ -56,6 +71,8 @@ if __name__ == "__main__":
     subprocess.run(["echo", "Start"])
 
     download_yt_mp3()
-    cut_by_chapters()
+    cut_by_chapters(True)
+    download_cover()
+    clear()
 
     subprocess.run(["echo", "Finish!"])
