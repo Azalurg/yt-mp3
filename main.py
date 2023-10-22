@@ -6,47 +6,6 @@ import sys
 import argparse
 
 
-def download_yt_mp3(yt_url: str, work_dir: str, audio_format: str = "mp3", audio_quality: int = 5,
-                    metadata: bool = False):
-    add_metadata = ""
-    if metadata:
-        add_metadata = "--add-metadata"
-    subprocess.run(
-        f"yt-dlp -o '{work_dir}%(title)s.%(ext)s' -S +res:144 --no-playlist  --extract-audio --audio-format {audio_format} --audio-quality {audio_quality} {add_metadata} --write-info-json {yt_url}",
-        shell=True, )
-    print("Downloading finished!")
-
-
-def download_yt_mp3_playlist(yt_url: str, work_dir: str, audio_format: str = "mp3", video_quality: int = 5,
-                             metadata: bool = False):
-    add_metadata = ""
-    if metadata:
-        add_metadata = "--add-metadata"
-    query = f"yt-dlp --yes-playlist -o '{work_dir}%(title)s.%(ext)s' -S 'height:{video_quality}' --merge-output-format {audio_format} {add_metadata} --write-info-json {yt_url}"
-    subprocess.run(query, shell=True)
-    print("Downloading finished!")
-
-
-def download_yt_mp4(yt_url: str, work_dir: str, video_format: str = "mp4", video_quality: int = 1080,
-                    metadata: bool = False):
-    add_metadata = ""
-    if metadata:
-        add_metadata = "--add-metadata"
-    query = f"yt-dlp -o '{work_dir}%(title)s.%(ext)s' -S 'height:{video_quality}' --no-playlist --merge-output-format {video_format} {add_metadata} --write-info-json {yt_url}"
-    subprocess.run(query, shell=True)
-    print("Downloading finished!")
-
-
-def download_yt_mp4_playlist(yt_url: str, work_dir: str, video_format: str = "mp4", video_quality: int = 1080,
-                             metadata: bool = False):
-    add_metadata = ""
-    if metadata:
-        add_metadata = "--add-metadata"
-    query = f"yt-dlp --yes-playlist -o '{work_dir}%(title)s.%(ext)s' -S 'height:{video_quality}' --merge-output-format {video_format} {add_metadata} --write-info-json {yt_url}"
-    subprocess.run(query, shell=True)
-    print("Downloading finished!")
-
-
 def download(yt_url: str, work_dir: str, ext: str = "mp3", q: int = 5, m: bool = False, p: bool = False):
 
     if ext not in ["mp3", "mp4"]:
@@ -145,30 +104,5 @@ if __name__ == "__main__":
 
     if args.mp4:
         download(args.url, args.w, "mp4", args.q, args.m, args.p)
-
-    # if args.mp3:
-    #     origin_file = f"{args.w}{args.url.split('=')[1]}.mp3"
-    #     download_yt_mp3(args.url, args.w, audio_quality=args.q, metadata=args.m)
-    #     if args.c:
-    #         cut_by_chapters(args.w, True)
-    #     download_cover(args.url, args.w)
-    #
-    # elif args.mp4:
-    #     if args.q >= 8:
-    #         args.q = 1080
-    #     elif args.q >= 6:
-    #         args.q = 720
-    #     elif args.q >= 4:
-    #         args.q = 480
-    #
-    #     if args.p:
-    #         download_yt_mp4_playlist(args.url, args.w, video_quality=args.q, metadata=args.m)
-    #     else:
-    #         download_yt_mp4(args.url, args.w, video_quality=args.q, metadata=args.m)
-
-        # if args.c:
-        #     cut_by_chapters(True)
-
-    # cleaner(args.w, origin_file, args.c)
 
     subprocess.run(["echo", "Process finished successfully"])
