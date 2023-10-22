@@ -1,24 +1,78 @@
+#!/bin/python3
+
 import json
 import subprocess
 import sys
 import argparse
 
 
-def download_yt_mp3(yt_url: str, output: str, audio_format: str = "mp3", audio_quality: int = 5):
+def download_yt_mp3(yt_url: str, work_dir: str, audio_format: str = "mp3", audio_quality: int = 5,
+                    metadata: bool = False):
+    add_metadata = ""
+    if metadata:
+        add_metadata = "--add-metadata"
     subprocess.run(
-        f"yt-dlp -o '{output}' -S +res:144 --extract-audio --audio-format {audio_format} --audio-quality {audio_quality} --add-metadata --write-info-json {yt_url}",
+        f"yt-dlp -o '{work_dir}%(title)s.%(ext)s' -S +res:144 --no-playlist  --extract-audio --audio-format {audio_format} --audio-quality {audio_quality} {add_metadata} --write-info-json {yt_url}",
         shell=True, )
     print("Downloading finished!")
-    
 
-def download_yt_mp4(yt_url: str, output: str, video_format: str = "mp4", video_quality: int = 1080):
-    query = f"yt-dlp -o '{output}' -S 'height:{video_quality}' --merge-output-format {video_format} --add-metadata --write-info-json {yt_url}"
+
+def download_yt_mp3_playlist(yt_url: str, work_dir: str, audio_format: str = "mp3", video_quality: int = 5,
+                             metadata: bool = False):
+    add_metadata = ""
+    if metadata:
+        add_metadata = "--add-metadata"
+    query = f"yt-dlp --yes-playlist -o '{work_dir}%(title)s.%(ext)s' -S 'height:{video_quality}' --merge-output-format {audio_format} {add_metadata} --write-info-json {yt_url}"
+    subprocess.run(query, shell=True)
+    print("Downloading finished!")
+
+
+def download_yt_mp4(yt_url: str, work_dir: str, video_format: str = "mp4", video_quality: int = 1080,
+                    metadata: bool = False):
+    add_metadata = ""
+    if metadata:
+        add_metadata = "--add-metadata"
+    query = f"yt-dlp -o '{work_dir}%(title)s.%(ext)s' -S 'height:{video_quality}' --no-playlist --merge-output-format {video_format} {add_metadata} --write-info-json {yt_url}"
+    subprocess.run(query, shell=True)
+    print("Downloading finished!")
+
+
+def download_yt_mp4_playlist(yt_url: str, work_dir: str, video_format: str = "mp4", video_quality: int = 1080,
+                             metadata: bool = False):
+    add_metadata = ""
+    if metadata:
+        add_metadata = "--add-metadata"
+    query = f"yt-dlp --yes-playlist -o '{work_dir}%(title)s.%(ext)s' -S 'height:{video_quality}' --merge-output-format {video_format} {add_metadata} --write-info-json {yt_url}"
+    subprocess.run(query, shell=True)
+    print("Downloading finished!")
+
+
+def download(yt_url: str, work_dir: str, ext: str = "mp3", q: int = 5, m: bool = False, p: bool = False):
+
+    if ext not in ["mp3", "mp4"]:
+        print(f"Wrong format: {ext}")
+        exit(1)
+
+    add_metadata = ""
+    quality = f"--audio-quality {q} --audio-format mp3 --extract-audio"
+    get_playlist = "--no-playlist"
+
+    if m:
+        add_metadata = "--add-metadata"
+
+    if p:
+        get_playlist = "--yes-playlist"
+
+    if ext == "mp4":
+        quality = f"-S 'height:{q}' --merge-output-format {ext}"
+
+    query = f"yt-dlp -o '{work_dir}%(title)s.%(ext)s' {quality} {get_playlist} {add_metadata} --write-info-json {yt_url}"
     subprocess.run(query, shell=True)
     print("Downloading finished!")
 
 
 # Cut by chapters
-def cut_by_chapters(work_dir:str, numbers: bool = False):
+def cut_by_chapters(work_dir: str, numbers: bool = False):
     # Find chapters in metadata
     chapters = ""
     with open(f"{origin_file}.info.json", "r") as f:
@@ -50,29 +104,22 @@ def cut_by_chapters(work_dir:str, numbers: bool = False):
 
 
 # Download video cover
-def download_cover(work_dir: str):
+def download_cover(yt_url: str, work_dir: str):
     subprocess.run(f"yt-dlp -o '{work_dir}/cover.jpg' --skip-download --write-thumbnail {yt_url}", shell=True)
     subprocess.run(f"mv {work_dir}/cover.jpg.webp {work_dir}/cover.jpg", shell=True)
 
 
-# Remove original file and metadata
-def cleaner(work_dir: str, main_file:str, chapters: bool):
-    subprocess.run(f"rm -rf {main_file}.info.json", shell=True)
-    if chapters:
-        subprocess.run(f"rm -rf {main_file}", shell=True)
-    print("Cleaning finished")
-
-
 # Main function
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Description of your script')
+    parser = argparse.ArgumentParser(description='Script description')
     parser.add_argument('-mp3', action='store_true', help='Enable MP3 option')
     parser.add_argument('-mp4', action='store_true', help='Enable MP4 option')
+    parser.add_argument('--cut', action='store_true', help='Cut by chapters')
     parser.add_argument('-w', type=str, default=".", help='Specify work directory, (default: current directory)')
     parser.add_argument('-q', type=int, default=5, help='Specify quality 0-10 0: best, (default: 5)')
     parser.add_argument('--url', type=str, help='Specify YouTube URL')
-    parser.add_argument('-c', action='store_true', help='Cut by chapters (default: 5)')
-
+    parser.add_argument('-p', action='store_true', help='Download playlist')
+    parser.add_argument('-m', action='store_true', help='Download metadata')
 
     args = parser.parse_args()
 
@@ -92,27 +139,36 @@ if __name__ == "__main__":
         args.w += "/"
     # main_file += "%(title)s.%(ext)s"
     origin_file = ""
-    
-    if args.mp3:
-        origin_file = f"{args.w}{args.url.split('=')[1]}.mp3"
-        download_yt_mp3(args.url, origin_file, audio_quality=args.q)
-        if args.c:
-            cut_by_chapters(args.w, True)
-            download_cover(args.w)
-            
-    elif args.mp4:
-        origin_file = f"{args.w}{args.url.split('=')[1]}.mp4"
-        if args.q >= 8:
-            args.q = 1080
-        elif args.q >= 6:
-            args.q = 720
-        elif args.q >= 4:
-            args.q = 480
-            
-        download_yt_mp4(args.url, origin_file, video_quality=args.q)
-        if args.c:
-            cut_by_chapters(true)
 
-    cleaner(args.w, origin_file, args.c)
+    if args.mp3:
+        download(args.url, args.w, "mp3", args.q, args.m, args.p)
+
+    if args.mp4:
+        download(args.url, args.w, "mp4", args.q, args.m, args.p)
+
+    # if args.mp3:
+    #     origin_file = f"{args.w}{args.url.split('=')[1]}.mp3"
+    #     download_yt_mp3(args.url, args.w, audio_quality=args.q, metadata=args.m)
+    #     if args.c:
+    #         cut_by_chapters(args.w, True)
+    #     download_cover(args.url, args.w)
+    #
+    # elif args.mp4:
+    #     if args.q >= 8:
+    #         args.q = 1080
+    #     elif args.q >= 6:
+    #         args.q = 720
+    #     elif args.q >= 4:
+    #         args.q = 480
+    #
+    #     if args.p:
+    #         download_yt_mp4_playlist(args.url, args.w, video_quality=args.q, metadata=args.m)
+    #     else:
+    #         download_yt_mp4(args.url, args.w, video_quality=args.q, metadata=args.m)
+
+        # if args.c:
+        #     cut_by_chapters(True)
+
+    # cleaner(args.w, origin_file, args.c)
 
     subprocess.run(["echo", "Process finished successfully"])
