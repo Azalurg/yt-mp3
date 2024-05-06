@@ -1,4 +1,5 @@
 import os
+from time import sleep
 
 import musicbrainzngs
 
@@ -11,9 +12,9 @@ from pytube import Playlist, YouTube
 class AgPlaylist:
     def __init__(
         self,
-        url: str,
-        artist: str,
-        album: str,
+        url: str = "",
+        artist: str = "",
+        album: str = "",
         genre: str = "",
         date: str = "",
         output_path: str = "/tmp",
@@ -28,9 +29,12 @@ class AgPlaylist:
         self.music_url_list = []
         self.prefix = "{}"
         self.is_cover = False
+        self.logs = []
 
         if self.date:
-            self.out_path_base = os.path.join(output_path, artist, f"{album} ({date})")
+            self.out_path_base = os.path.join(
+                output_path, "music", genre, artist, f"{album} ({date})"
+            )
 
         self.cover_path = os.path.join(self.out_path_base, "cover.jpg")
         self.songs_paths = []
@@ -45,41 +49,52 @@ class AgPlaylist:
         self.prefix = "{" + f":0{len(str(playlist.length))}" + "}. "
 
     def _get_cover(self):
-        try:
-            musicbrainzngs.set_useragent("AudioGrab", 1.0)
-            result = musicbrainzngs.search_releases(
-                artist=self.artist, release=self.album, limit=5
+        for _ in range(10):
+            try:
+                musicbrainzngs.set_useragent("AudioGrab", 1.0)
+                result = musicbrainzngs.search_releases(
+                    artist=self.artist, release=self.album, limit=5
+                )
+                album_id = result["release-list"][0]["id"]
+                cover_data = musicbrainzngs.get_image_front(album_id)
+
+                with open(self.cover_path, "wb") as file:
+                    file.write(cover_data)
+
+                self.is_cover = True
+                break
+
+            except Exception:
+                sleep(2)
+                continue
+
+        if not self.is_cover:
+            self.logs.append(
+                f"COVER: Error getting cover for: {self.artist} - {self.album}"
             )
-            album_id = result["release-list"][0]["id"]
-            cover_data = musicbrainzngs.get_image_front(album_id)
-
-            with open(self.cover_path, "wb") as file:
-                file.write(cover_data)
-
-            self.is_cover = True
-
-        except Exception:
-            pass
 
     def _download_songs(self):
         for i, url in enumerate(self.music_url_list):
-            yt = YouTube(url)
-            video_path = (
-                yt.streams.filter(file_extension="webm", type="audio")
-                .order_by("abr")
-                .desc()
-                .first()
-                .download(
-                    output_path=self.out_path_base,
-                    filename_prefix=self.prefix.format(i + 1),
+            try:
+                yt = YouTube(url)
+                video_path = (
+                    yt.streams.filter(file_extension="webm", type="audio")
+                    .order_by("abr")
+                    .desc()
+                    .first()
+                    .download(
+                        output_path=self.out_path_base,
+                        filename_prefix=self.prefix.format(i + 1),
+                    )
                 )
-            )
-            audio = AudioSegment.from_file(video_path, format="webm")
-            audio.export(video_path.replace(".webm", ".mp3"), format="mp3")
-            os.remove(video_path)
-            print(round((i + 1) / len(self.music_url_list) * 100, 0), end="% ")
-            self.songs_paths.append(video_path.replace(".webm", ".mp3"))
-        print("")
+                audio = AudioSegment.from_file(video_path, format="webm")
+                audio.export(video_path.replace(".webm", ".mp3"), format="mp3")
+                os.remove(video_path)
+                self.songs_paths.append(video_path.replace(".webm", ".mp3"))
+            except Exception as e:
+                self.logs.append(
+                    f"SONG: Error downloading a song: {i+1}/{len(self.music_url_list)} {self.artist} - {self.album}: {e}"
+                )
 
     def _apply_metadata(self):
         for i, path in enumerate(self.songs_paths):
@@ -105,12 +120,16 @@ class AgPlaylist:
                 audio_file.save()
 
     def download(self):
-        print(f"Start: {self.artist} - {self.album} ({self.date})")
+        title = f"{self.artist} - {self.album} ({self.date})"
+        print(f"Start: {title}")
         self._prepare_playlist()
-        print(f"{len(self.music_url_list)} songs found")
         self._get_cover()
-        print(f"Cover: {self.is_cover}")
         self._download_songs()
-        print(f"{len(self.songs_paths)} songs downloaded in {self.out_path_base}")
         self._apply_metadata()
-        print("Finish")
+        print(
+            f"Download completed for {title} - {len(self.songs_paths)/len(self.music_url_list)} songs"
+        )
+
+    def print_logs(self):
+        for log in self.logs:
+            print(log)
