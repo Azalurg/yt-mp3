@@ -30,6 +30,7 @@ class AgPlaylist:
         self.prefix = "{}"
         self.is_cover = False
         self.logs = []
+        self.extras = ["(Official Audio)", "(Official Music Video)", self.artist + " - ", "- Full album", "(HQ)"]
 
         if self.date:
             self.out_path_base = os.path.join(
@@ -87,6 +88,11 @@ class AgPlaylist:
                         filename_prefix=self.prefix.format(i + 1),
                     )
                 )
+                audio_filename = video_path.replace(".webm", ".mp3")
+                for s in self.extras:
+                    audio_filename = audio_filename.replace(s, "")
+                audio_filename = " ".join(audio_filename.split())
+
                 audio = AudioSegment.from_file(video_path, format="webm")
                 audio.export(video_path.replace(".webm", ".mp3"), format="mp3")
                 os.remove(video_path)
