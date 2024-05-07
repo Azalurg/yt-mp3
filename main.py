@@ -1,10 +1,25 @@
 import concurrent.futures
 
 from src.playlist import AgPlaylist
+import json
 
+input_file = "input.json"
+max_workers = 5
 playlists = []
 
-max_workers = 5
+with open(input_file, "r") as f:
+    raw_data = json.load(f)
+
+for rd in raw_data:
+    playlists.append(
+        AgPlaylist(
+            url=rd["url"],
+            artist=rd["artist"],
+            album=rd["album"],
+            genre=rd["genre"],
+            date=rd["date"],
+        )
+    )
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
     executor.map(AgPlaylist.download, playlists)
