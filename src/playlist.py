@@ -30,7 +30,15 @@ class AgPlaylist:
         self.prefix = "{}"
         self.is_cover = False
         self.logs = []
-        self.extras = ["(Official Audio)", "(Official Music Video)", self.artist + " - ", "- Full album", "(HQ)"]
+        self.extras = [
+            "(Official Audio)",
+            "(Official Music Video)",
+            self.artist + " - ",
+             " - " + self.artist,
+            "- Full album",
+            "(HQ)",
+            "(Official Lyric Video)",
+        ]
 
         if self.date:
             self.out_path_base = os.path.join(
@@ -91,6 +99,7 @@ class AgPlaylist:
                 audio_filename = video_path.replace(".webm", ".mp3")
                 for s in self.extras:
                     audio_filename = audio_filename.replace(s, "")
+                    audio_filename = audio_filename.replace(s.upper(), "")
                 audio_filename = " ".join(audio_filename.split())
 
                 audio = AudioSegment.from_file(video_path, format="webm")
@@ -133,7 +142,7 @@ class AgPlaylist:
         self._download_songs()
         self._apply_metadata()
         print(
-            f"Download completed for {title} - {len(self.songs_paths)/len(self.music_url_list)} songs"
+            f"Download completed for {title} - {round(len(self.songs_paths)/len(self.music_url_list),2)}% songs"
         )
 
     def print_logs(self):

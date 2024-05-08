@@ -21,6 +21,8 @@ for rd in raw_data:
         )
     )
 
+print(len(playlists))
+
 with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
     executor.map(AgPlaylist.download, playlists)
 
