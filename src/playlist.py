@@ -34,7 +34,7 @@ class AgPlaylist:
             "(Official Audio)",
             "(Official Music Video)",
             self.artist + " - ",
-             " - " + self.artist,
+            " - " + self.artist,
             "- Full album",
             "(HQ)",
             "(Official Lyric Video)",
@@ -103,9 +103,9 @@ class AgPlaylist:
                 audio_filename = " ".join(audio_filename.split())
 
                 audio = AudioSegment.from_file(video_path, format="webm")
-                audio.export(video_path.replace(".webm", ".mp3"), format="mp3")
+                audio.export(audio_filename, format="mp3")
                 os.remove(video_path)
-                self.songs_paths.append(video_path.replace(".webm", ".mp3"))
+                self.songs_paths.append(audio_filename)
             except Exception as e:
                 self.logs.append(
                     f"SONG: Error downloading a song: {i+1}/{len(self.music_url_list)} {self.artist} - {self.album}: {e}"
@@ -142,7 +142,7 @@ class AgPlaylist:
         self._download_songs()
         self._apply_metadata()
         print(
-            f"Download completed for {title} - {round(len(self.songs_paths)/len(self.music_url_list),2)}% songs"
+            f"Download completed for {title} - {round(len(self.songs_paths)/len(self.music_url_list),4)*100}% songs"
         )
 
     def print_logs(self):
