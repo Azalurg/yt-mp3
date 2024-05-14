@@ -29,7 +29,8 @@ class AgPlaylist:
         self.music_url_list = []
         self.prefix = "{}"
         self.is_cover = False
-        self.logs = []
+        self.cover_logs = []
+        self.music_logs = []
         self.extras = [
             "(Official Audio)",
             "(Official Music Video)",
@@ -51,6 +52,8 @@ class AgPlaylist:
             os.makedirs(self.out_path_base)
         except FileExistsError:
             pass
+
+        self._prepare_playlist()
 
     def _prepare_playlist(self):
         playlist = Playlist(self.playlist_url)
@@ -78,7 +81,7 @@ class AgPlaylist:
                 continue
 
         if not self.is_cover:
-            self.logs.append(
+            self.cover_logs.append(
                 f"COVER: Error getting cover for: {self.artist} - {self.album}"
             )
 
@@ -107,8 +110,8 @@ class AgPlaylist:
                 os.remove(video_path)
                 self.songs_paths.append(audio_filename)
             except Exception as e:
-                self.logs.append(
-                    f"SONG: Error downloading a song: {i+1}/{len(self.music_url_list)} {self.artist} - {self.album}: {e}"
+                self.music_logs.append(
+                    f"SONG: Error downloading a song: {i+1}/{len(self.music_url_list)} {self.artist} - {self.album}: {e} - {url}"
                 )
 
     def _apply_metadata(self):
@@ -137,7 +140,6 @@ class AgPlaylist:
     def download(self):
         title = f"{self.artist} - {self.album} ({self.date})"
         print(f"Start: {title}")
-        self._prepare_playlist()
         self._get_cover()
         self._download_songs()
         self._apply_metadata()
@@ -145,6 +147,10 @@ class AgPlaylist:
             f"Download completed for {title} - {round(len(self.songs_paths)/len(self.music_url_list),4)*100}% songs"
         )
 
-    def print_logs(self):
-        for log in self.logs:
+    def print_cover_logs(self):
+        for log in self.cover_logs:
+            print(log)
+
+    def print_music_logs(self):
+        for log in self.music_logs:
             print(log)
