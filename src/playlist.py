@@ -38,6 +38,10 @@ class AgPlaylist:
             " - " + self.artist,
             "- Full album",
             "(HQ)",
+            "(HD)",
+            "(4K)",
+            "(Vinyl RIP)",
+            "(Official Video)",
             "(Official Lyric Video)",
         ]
 

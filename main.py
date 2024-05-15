@@ -1,16 +1,21 @@
 import concurrent.futures
+import time
 
 from src.playlist import AgPlaylist
 import json
 
 input_file = "input.json"
-max_workers = 5
+max_workers = 7
 playlists = []
+
+print("Reading input file...")
 
 with open(input_file, "r") as f:
     raw_data = json.load(f)
 
 songs_sum = 0
+
+print("Loading playlists...")
 
 for rd in raw_data:
     p = AgPlaylist(
@@ -24,6 +29,9 @@ for rd in raw_data:
 
     playlists.append(p)
 
+print(f"Found {len(playlists)} playlists")
+print(f"Downloading {songs_sum} songs...")
+print(f"Expected time: {round(songs_sum*3.15, 2)} seconds")
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
     executor.map(AgPlaylist.download, playlists)
@@ -35,7 +43,7 @@ for playlist in playlists:
     acc += len(playlist.cover_logs)
     playlist.print_cover_logs()
 
-if acc >= 0:
+if acc > 0:
     print("\n =========== \n")
 
 acc = 0
