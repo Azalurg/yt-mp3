@@ -38,22 +38,26 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
 
 print("All downloads completed!")
 
-acc = 0
-for playlist in playlists:
-    acc += len(playlist.cover_logs)
-    playlist.print_cover_logs()
+songs_logs = 0
 
-if acc > 0:
-    print("\n =========== \n")
+with open("logs.txt.txt", "w") as f:
+    acc = 0
+    for playlist in playlists:
+        acc += len(playlist.cover_logs)
+        for log in playlist.cover_logs:
+            f.write(log + "\n")
 
-acc = 0
+    if acc > 0:
+        f.write("\n =========== \n")
 
-for playlist in playlists:
-    playlist.print_music_logs()
-    acc += len(playlist.music_logs)
+    acc = 0
+    for playlist in playlists:
+        songs_logs += len(playlist.music_logs)
+        for log in playlist.music_logs:
+            f.write(log + "\n")
 
-downloaded_songs = songs_sum - acc
+downloaded_songs = songs_sum - songs_logs
 
 print(
-    f"{downloaded_songs}/{songs_sum} downloaded ({round(downloaded_songs/songs_sum, 4) *100}%)"
+    f"\n{downloaded_songs}/{songs_sum} downloaded ({round(downloaded_songs/songs_sum, 4) *100}%)"
 )

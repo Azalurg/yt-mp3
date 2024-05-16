@@ -151,10 +151,3 @@ class AgPlaylist:
             f"Download completed for {title} - {round(len(self.songs_paths)/len(self.music_url_list),4)*100}% songs"
         )
 
-    def print_cover_logs(self):
-        for log in self.cover_logs:
-            print(log)
-
-    def print_music_logs(self):
-        for log in self.music_logs:
-            print(log)
