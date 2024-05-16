@@ -150,4 +150,3 @@ class AgPlaylist:
         print(
             f"Download completed for {title} - {round(len(self.songs_paths)/len(self.music_url_list),4)*100}% songs"
         )
-
