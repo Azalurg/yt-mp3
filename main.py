@@ -1,4 +1,5 @@
 import concurrent.futures
+import datetime
 import time
 
 from src.playlist import AgPlaylist
@@ -40,7 +41,8 @@ print("All downloads completed!")
 
 songs_logs = 0
 
-with open("logs.txt.txt", "w") as f:
+with open("logs.txt", "a") as f:
+    f.write(f"\n=== {datetime.datetime.now()} ===\n")
     acc = 0
     for playlist in playlists:
         acc += len(playlist.cover_logs)
