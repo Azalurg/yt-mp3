@@ -16,9 +16,9 @@ def print_metadata(song_path):
 
 def append_genre(song_path: str, genre_to_add: str, detect: str = ""):
     audio_file = EasyID3(song_path)
-    if 'genre' not in audio_file:
-            audio_file['genre'] = []
-        
+    if "genre" not in audio_file:
+        audio_file["genre"] = []
+
     original_genre = audio_file["genre"]
     flag = True
 
@@ -52,8 +52,8 @@ if __name__ == "__main__":
     for song in songs:
         append_genre(song, "Heavy Metal", detect="metal")
         count += 1
-        if count % (songs_amount//10) == 0:
+        if count % (songs_amount // 10) == 0:
             print(f"Updated {count} songs")
-            
+
     print(f"Updated {count} songs")
 print(f" in {time.time() - start:.2f} seconds")

@@ -1,5 +1,6 @@
 import os
 from time import sleep
+from typing import List
 
 import musicbrainzngs
 
@@ -7,6 +8,17 @@ from mutagen.easyid3 import EasyID3
 from mutagen.id3 import APIC, ID3
 from pydub import AudioSegment
 from pytube import Playlist, YouTube
+
+
+class Log:
+    title: str
+    info: str
+    url: str
+
+    def __init__(self, title: str, info: str, url: str = ""):
+        self.title = title
+        self.info = info
+        self.url = ""
 
 
 class AgPlaylist:
@@ -29,8 +41,8 @@ class AgPlaylist:
         self.music_url_list = []
         self.prefix = "{}"
         self.is_cover = False
-        self.cover_logs = []
-        self.music_logs = []
+        self.cover_logs: List[Log] = []
+        self.music_logs: List[Log] = []
         self.extras = [
             "(Official Audio)",
             "(Official Music Video)",
@@ -43,6 +55,13 @@ class AgPlaylist:
             "(Vinyl RIP)",
             "(Official Video)",
             "(Official Lyric Video)",
+            "(Audio)",
+            "(Lyrics)",
+            "(Lyric Video)",
+            "(Official)",
+            "(Music Video)",
+            "(Video)",
+            "(Full Album)",
         ]
 
         if self.date:
@@ -85,9 +104,7 @@ class AgPlaylist:
                 continue
 
         if not self.is_cover:
-            self.cover_logs.append(
-                f"COVER: Error getting cover for: {self.artist} - {self.album}"
-            )
+            self.cover_logs.append(Log("COVER", f"{self.artist} - {self.album}"))
 
     def _download_songs(self):
         for i, url in enumerate(self.music_url_list):
@@ -103,6 +120,7 @@ class AgPlaylist:
                         filename_prefix=self.prefix.format(i + 1),
                     )
                 )
+
                 audio_filename = video_path.replace(".webm", ".mp3")
                 for s in self.extras:
                     audio_filename = audio_filename.replace(s, "")
@@ -115,7 +133,11 @@ class AgPlaylist:
                 self.songs_paths.append(audio_filename)
             except Exception as e:
                 self.music_logs.append(
-                    f"SONG: Error downloading a song: {i+1}/{len(self.music_url_list)} {self.artist} - {self.album}: {e} - {url}"
+                    Log(
+                        "SONG",
+                        f"{i+1}/{len(self.music_url_list)} {self.artist} - {self.album}: {e}",
+                        url,
+                    )
                 )
 
     def _apply_metadata(self):

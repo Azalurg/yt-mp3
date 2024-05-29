@@ -12,8 +12,10 @@ class Cover:
         return f"Cover: {self.cover_path} in {self.directory}"
 
 
-def apply_cover(file_path, cover_path):
+def apply_cover(file_path, cover_path) -> int:
     audio_file = ID3(file_path)
+    if "APIC" in audio_file:
+        del audio_file["APIC"]
     with open(cover_path, "rb") as f:
         audio_file["APIC"] = APIC(
             encoding=3,
@@ -23,6 +25,7 @@ def apply_cover(file_path, cover_path):
             data=f.read(),
         )
     audio_file.save(file_path)
+    return 1
 
 
 def find_covers(path) -> list[Cover]:
@@ -40,10 +43,11 @@ def apply_all_covers(covers: list[Cover]):
         for root, _, files in os.walk(cover.directory):
             for file in files:
                 if file.endswith(".mp3"):
-                    apply_cover(os.path.join(root, file), cover.cover_path)
-                    count += 1
+                    count += apply_cover(os.path.join(root, file), cover.cover_path)
     print(f"Applied {count} covers")
 
+
+# TODO: Deal with existing covers (delata/replace)
 
 if __name__ == "__main__":
     print("Applying covers...")

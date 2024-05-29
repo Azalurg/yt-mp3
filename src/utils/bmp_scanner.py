@@ -24,7 +24,7 @@ def categorize_mp3_files(directory):
 
 
 if __name__ == "__main__":
-    directory = '/tmp/music/'
+    directory = "/tmp/music/"
     categorized_files = categorize_mp3_files(directory)
     for category, files in categorized_files.items():
         if len(files) == 0:
