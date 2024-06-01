@@ -21,7 +21,7 @@ class Log:
         self.url = ""
 
 
-class AgPlaylist:
+class ArPlaylist:
     def __init__(
         self,
         url: str = "",

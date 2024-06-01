@@ -2,7 +2,7 @@ import concurrent.futures
 import datetime
 import time
 
-from src.playlist import AgPlaylist
+from src.playlist import ArPlaylist
 import json
 
 input_file = "input.json"
@@ -20,7 +20,7 @@ print("Loading playlists...")
 print(f"Expected time: {len(raw_data)} seconds")
 time_start = time.time()
 for rd in raw_data:
-    p = AgPlaylist(
+    p = ArPlaylist(
         url=rd["url"],
         artist=rd["artist"],
         album=rd["album"],
@@ -39,7 +39,7 @@ print(f"Expected time: {round(songs_sum*2.65, 2)} seconds")
 stat_time = time.time()
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-    executor.map(AgPlaylist.download, playlists)
+    executor.map(ArPlaylist.download, playlists)
 
 print("All downloads completed!")
 print(f"Downloading time: {round(time.time() - stat_time, 2)} seconds")

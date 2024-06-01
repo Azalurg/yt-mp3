@@ -4,10 +4,10 @@ from typing import List
 from pydub import AudioSegment
 from pytube import YouTube
 
-from src.audio import AgAudio
+from src.audio import ArAudio
 
 
-class AgChapter:
+class ArChapter:
     def __init__(self, title: str, start: int, end):
         self.title = title
         self.start = start
@@ -17,12 +17,12 @@ class AgChapter:
         return f"{self.title} - {self.start} - {self.end}"
 
 
-class AgCollection:
+class ArCollection:
     def __init__(self, url: str):
         self.url = url
         self.yt = YouTube(url)
         self.data = self.yt.initial_data
-        self.chapters: List[AgChapter] = []
+        self.chapters: List[ArChapter] = []
         self.audio_path = ""
 
     def find_it(self, source: dict, key: str):
@@ -42,7 +42,7 @@ class AgCollection:
         for c in raw_chapters:
             title = c["macroMarkersListItemRenderer"]["title"]["simpleText"]
             start = self.find_it(c, "startTimeSeconds") or 0
-            self.chapters.append(AgChapter(title, start, 0))
+            self.chapters.append(ArChapter(title, start, 0))
         for i, c in enumerate(self.chapters):
             if i + 1 < len(self.chapters):
                 c.end = self.chapters[i + 1].start
@@ -50,7 +50,7 @@ class AgCollection:
                 c.end = self.yt.length
 
     def download_audio(self):
-        self.audio_path = AgAudio(self.url, "/tmp").perform()
+        self.audio_path = ArAudio(self.url, "/tmp").perform()
 
     def cut_audio(self):
         for c in self.chapters:
@@ -72,5 +72,5 @@ class AgCollection:
 
 if __name__ == "__main__":
     url = "https://www.youtube.com/watch?v=b1Fo_M_tj6w"
-    ac = AgCollection(url)
+    ac = ArCollection(url)
     print(ac.perform())

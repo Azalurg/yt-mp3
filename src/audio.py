@@ -26,7 +26,7 @@ static_filter_params = [
 ]
 
 
-class AgAudio:
+class ArAudio:
     audio_path: Path
 
     def __init__(self, url: str, output_base: str, **kwargs):
@@ -137,6 +137,6 @@ class AgAudio:
 
 if __name__ == "__main__":
     url = "https://www.youtube.com/watch?v=PdRaUIhTmpg"
-    audio = AgAudio(url, "/tmp", artist="Azalurg")
+    audio = ArAudio(url, "/tmp", artist="Azalurg")
     audio.perform()
     print(audio.audio_path)
