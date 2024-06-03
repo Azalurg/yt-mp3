@@ -30,8 +30,8 @@ static_filter_params = [
 class ArAudio:
     audio_path: Path
 
-    def __init__(self, url: str, output_base: str, **kwargs):
-        self.url = url
+    def __init__(self, audio_url: str, output_base: str, **kwargs):
+        self.audio_url = audio_url
         self.output_dir_base = output_base
         self.title = kwargs.get("title", "")
         self.artist = kwargs.get("artist", "")
@@ -71,7 +71,7 @@ class ArAudio:
 
     def download(self):
         try:
-            yt = YouTube(self.url)
+            yt = YouTube(self.audio_url)
             audio_stream = yt.streams.filter(only_audio=True).first()
             audio_path = audio_stream.download(
                 output_path=self.output_dir, filename_prefix=self.prefix
@@ -79,7 +79,7 @@ class ArAudio:
             self.audio_path = Path(audio_path)
             return self.audio_path
         except PytubeError as e:
-            print(f"Error downloading {self.url}: {e}")
+            print(f"Error downloading {self.audio_url}: {e}")
             return None
 
     def clean_title(self):

@@ -5,6 +5,7 @@ from pydub import AudioSegment
 from pytube import YouTube
 
 from src.audio import ArAudio
+from src.metadata import ArMetadata
 
 
 class ArChapter:
@@ -18,12 +19,13 @@ class ArChapter:
 
 
 class ArCollection:
-    def __init__(self, url: str):
+    def __init__(self, url: str, metadata: ArMetadata = ArMetadata()):
         self.url = url
         self.yt = YouTube(url)
         self.data = self.yt.initial_data
         self.chapters: List[ArChapter] = []
         self.audio_path = ""
+        self.metadata = metadata
 
     def find_it(self, source: dict, key: str):
         if key in source:
@@ -50,7 +52,11 @@ class ArCollection:
                 c.end = self.yt.length
 
     def download_audio(self):
-        self.audio_path = ArAudio(self.url, "/tmp").perform()
+        self.audio_path = ArAudio(
+            audio_url=self.url,
+            output_base="/tmp/music",
+            **self.metadata.get_dict()
+        ).perform()
 
     def cut_audio(self):
         for c in self.chapters:
@@ -64,10 +70,6 @@ class ArCollection:
         self.download_audio()
         self.cut_audio()
         return 0
-
-
-# TODO: fix static paths
-# add naming to the files
 
 
 if __name__ == "__main__":
