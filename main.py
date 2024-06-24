@@ -19,6 +19,7 @@ songs_sum = 0
 print("Loading playlists...")
 print(f"Expected time: {len(raw_data)} seconds")
 time_start = time.time()
+albums = []
 for rd in raw_data:
     p = ArPlaylist(
         url=rd["url"],
@@ -27,8 +28,11 @@ for rd in raw_data:
         genre=rd["genre"],
         date=rd["date"],
     )
+    if p.album in albums:
+        print(f"Album {p.album} already in list")
+        exit()
+    albums.append(p)
     songs_sum += len(p.music_url_list)
-
     playlists.append(p)
 
 print(f"Found {len(playlists)} playlists")

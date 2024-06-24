@@ -62,6 +62,7 @@ class ArPlaylist:
             "(Music Video)",
             "(Video)",
             "(Full Album)",
+            "(Official International Video)"
         ]
 
         if self.date:

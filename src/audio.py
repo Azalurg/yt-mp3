@@ -9,6 +9,7 @@ from pytube.exceptions import PytubeError
 static_filter_params = [
     "(Official Audio)",
     "(Official Music Video)",
+    "[Official HD Music Video]",
     "- Full album",
     "(HQ)",
     "(HD)",
@@ -60,6 +61,7 @@ class ArAudio:
         self.filter_params = static_filter_params
         self.filter_params.append(f"({self.date})")
         self.filter_params.append(f"({self.genre})")
+        self.fitler_params.append(f"({self.album})")
         self.filter_params.append(f"{self.album} - ")
         self.filter_params.append(f" - {self.album}")
         self.filter_params.append(f"{self.artist} - ")
