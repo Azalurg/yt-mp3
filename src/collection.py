@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import List
 
 from pydub import AudioSegment
@@ -15,7 +16,7 @@ class ArChapter:
         self.end = end
 
     def __str__(self):
-        return f"{self.title} - {self.start} - {self.end}"
+        return f"{self.title}"
 
 
 class ArCollection:
@@ -54,15 +55,19 @@ class ArCollection:
     def download_audio(self):
         self.audio_path = ArAudio(
             audio_url=self.url,
-            output_base="/tmp/music",
-            **self.metadata.get_dict()
+            output_base=Path("/tmp/music/"),
+            **self.metadata.get_dict(),
         ).perform()
 
     def cut_audio(self):
         for c in self.chapters:
+            self.metadata.title = c.title
+            self.metadata.prepare_output_path()
             audio = AudioSegment.from_file(self.audio_path, format="mp3")
             audio = audio[c.start * 1000 : c.end * 1000]
-            audio.export(f"/tmp/music{c.title}.mp3", format="mp3")
+            audio.export(
+                self.metadata.audio_output_path, format="mp3"
+            )  # TODO: Output file in metadata
         os.remove(self.audio_path)
 
     def perform(self):
@@ -73,6 +78,14 @@ class ArCollection:
 
 
 if __name__ == "__main__":
-    url = "https://www.youtube.com/watch?v=b1Fo_M_tj6w"
-    ac = ArCollection(url)
-    print(ac.perform())
+    audio_url = "https://www.youtube.com/watch?v=qlEoNKikrZs"
+    metadata = ArMetadata(
+        artist="MICROMECHA",
+        album="Time Flows Constantly",
+        genre="Barber Beats",
+        date="2024",
+        cover_path="/tmp/cover.jpg",
+    )
+    collection = ArCollection(audio_url, metadata)
+    collection.perform()
+    print(collection.chapters)

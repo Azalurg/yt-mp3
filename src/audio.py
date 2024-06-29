@@ -30,7 +30,7 @@ static_filter_params = [
 class ArAudio:
     audio_path: Path
 
-    def __init__(self, audio_url: str, output_base: str, **kwargs):
+    def __init__(self, audio_url: str, output_base: Path, **kwargs):
         self.audio_url = audio_url
         self.output_dir_base = output_base
         self.title = kwargs.get("title", "")

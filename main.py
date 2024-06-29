@@ -38,7 +38,7 @@ for rd in raw_data:
 print(f"Found {len(playlists)} playlists")
 print(f"Downloading {songs_sum} songs...")
 print(f"Initialization time: {round(time.time() - time_start, 2)} seconds")
-print(f"Expected time: {round(songs_sum*2.65, 2)} seconds")
+print(f"Expected time: {round(songs_sum*3.42, 2)} seconds")
 
 stat_time = time.time()
 
